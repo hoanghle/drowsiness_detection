@@ -5,25 +5,26 @@ import cv2;
 
 model = YOLO("train3/best.pt")
 
-img = cv2.imread("img_test/test4.jpg")
+frame_skip = 3  #quy ước số frame ko xử lí để đỡ tốn tài nguyên
+frame_count = 0     # (?) reset lại frame_count sau mỗi số awake_count đạt yêu cầu?
+sleeping_count = 0    #quy ước số frame được tính là ngủ để phát cảnh báo
+awake_count = 0     #
+cap = cv2.VideoCapture(0)
+while cap.isOpened():
+    ret, frame = cap.read()
+    
+    if frame_count % frame_skip == 0:
+        results = model.predict(source=frame, save=False, show=False, conf=0.6)
+        annotated_frame = results[0].plot()
+    # else:
+    #     annotated_frame = frame  #không hiển thị các frame không xử lý cho trông output mượt hơn
 
-#results = model.predict(source=img, show=True)  
-results = model.predict(source=img) 
+    frame_count += 1
 
-scale_percent = 50  # Scale 50% so với kích thước gốc
-for result in results:
-    img_result = result.plot()  # Lấy ảnh kết quả từ model
+    cv2.imshow("YOLO Real-Time Detection", annotated_frame)
 
-    # Tính kích thước mới
-    width = int(img_result.shape[1] * scale_percent / 100)
-    height = int(img_result.shape[0] * scale_percent / 100)
-    dim = (width, height)
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
 
-    # Resize hình ảnh
-    scaled_result = cv2.resize(img_result, dim)
-
-    # Hiển thị kết quả
-    cv2.imshow("Scaled Result", scaled_result)
-    cv2.waitKey(0)
-
-cv2.waitKey()
+cap.release()
+cv2.destroyAllWindows()
