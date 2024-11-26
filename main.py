@@ -10,7 +10,7 @@ model = YOLO("train3/best.pt")
 
 mixer.init()
 mixer.music.load("sound/1126.wav")
-# mixer.music.play()
+
 frame_skip = 3  #quy ước số frame ko xử lí để đỡ tốn tài nguyên
 frame_count = 0     # (?) reset lại frame_count sau mỗi số awake_count đạt yêu cầu?
 sleep_count = 0    #quy ước số frame được tính là ngủ để phát cảnh báo
@@ -32,15 +32,15 @@ while cap.isOpened():
 
         for box in results[0].boxes:
             label = box.cls
-            name = results[0].names[int(label)]  # Lấy tên nhãn từ id
-            if name.lower() == "sleep":  # Nhãn "sleeping"
+            name = results[0].names[int(label)]  # lấy tên label
+            if name.lower() == "sleep":  
                 sleeping_flag = True
-                break  # Chỉ cần biết có "sleeping" là đủ
+                break  
             # else:
             #     break
         if sleeping_flag:
             sleep_count += 1
-            awake_count = 0  # Reset awake_count khi phát hiện "sleeping"
+            awake_count = 0  
         else:
             awake_count += 1
             sleep_count = 0 
@@ -58,16 +58,14 @@ while cap.isOpened():
             alert_start_time = None
 
         if alert_start_time:
-            cv2.putText( annotated_frame, "Sleeping", (10, 50), cv2.FONT_HERSHEY_SIMPLEX,  1,  (0, 0, 255), 2, cv2.LINE_AA)
+            cv2.putText( annotated_frame, "Sleeping", (20, 20), cv2.FONT_HERSHEY_SIMPLEX,  1,  (0, 0, 255), 2, cv2.LINE_AA)
 
     # else:
-    #     annotated_frame = frame  #không hiển thị các frame không xử lý cho trông output mượt hơn
-
-    
+    #     annotated_frame = frame  #không hiển thị các frame không xử lý
 
     frame_count += 1
 
-    cv2.imshow("YOLO Real-Time Detection", annotated_frame)
+    cv2.imshow("Drowsiness Detection", annotated_frame)
 
     if cv2.waitKey(1) & 0xFF == 27:
         break
